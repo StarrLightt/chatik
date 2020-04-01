@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Tož můj servřík s háčkami a čárkami</title>
+    <script>
+        const HOST = window.location.protocol + "//" + window.location.hostname + ((window.location.port) ? ":" + window.location.port : "");
+        function odesli() {
+            let v = document.getElementById("zprava").value;
+            let n = document.getElementById("nickname").value;
+            if (v == "" || n == null) {
+                alert("Nickname and message must be filled out!");
+                return false;
+            }
+            document.getElementById("zprava").value = "";
+            let url = HOST+"/chat/add";
+            let body = {};
+            body.msg = v;
+            body.nick = n;
+            let options = {};
+            options.method = "POST";
+            options.body = JSON.stringify(body);
+            fetch(url, options).then(function(response) {
+                response.text().then(function(text) {
+                    //nemusim nic delat
+                });
+            });
+        }
+
+        function ukazZpravy() {
+            let url = HOST+"/chat/list";
+            fetch(url).then(function(response) {
+                response.text().then(function(text) {
+                    let obj = JSON.parse(text);
+                    let s = "";
+                    for (let msg of obj.messages.splice(-100)) {
+                        s =  s  + "<span style=\"font-size:75%; color:gray\">" + "<i>" +  msg.time + "</i>" + " " + msg.nickname + "</span><br><b>" + msg.text + "</b><br>";
+
+                    }
+                    document.getElementById("zpravy").innerHTML = s;
+                });
+            });
+        }
+        function ukazCitac() {
+            setInterval(ukazZpravy, 1000);
+
+            let url = HOST+"/citac";
+            fetch(url).then(function(response) {
+                response.text().then(function(text) {
+                    let obj = JSON.parse(text);
+                    document.getElementById("vystupCitac").innerHTML =
+                        "<b>" + obj.citac + "</b> (" + obj.popis + ")";
+                });
+            });
+        }
+
+    </script>
+</head>
+<body onload="ukazCitac()">
+
+<h1 style="color: #C90334; background-color: #00e3d1">Tož můj servřík s háčkama a čárkama</h1>
+Ahoj, námořníku!
+
+<div id="vystupCitac">...</div>
+
+<h1>Chatík</h1>
+
+<div id="zpravy"></div>
+<input type="text" id="nickname" name="nickname" placeholder="nickname">
+<input type="text" id="zprava" name="zprava" placeholder="message">
+<input type="button" value="Odesli" onclick="odesli()">
+
+</body>
+</html>
